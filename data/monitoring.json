@@ -1,0 +1,9 @@
+[
+  {
+    "patient_id": "patient_4565b33d",
+    "active": true,
+    "trend": "infection",
+    "interval_seconds": 10,
+    "started_at": "2026-04-10T09:43:22.443660"
+  }
+]

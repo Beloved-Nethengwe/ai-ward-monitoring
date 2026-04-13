@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Sarah",
+    "surname": "Nkosi",
+    "ward": "Surgical",
+    "bed": "B12",
+    "assigned_nurse": "Nurse Dlamini",
+    "admission_reason": "Appendectomy",
+    "surgeries": [
+      "Laparoscopic appendectomy"
+    ],
+    "notes": "Mild abdominal pain overnight",
+    "id": "patient_68bdf3d5",
+    "created_at": "2026-04-07T08:21:01.459200"
+  },
+  {
+    "name": "Beloved",
+    "surname": "Nethengwe",
+    "ward": "Surgical",
+    "bed": "B12",
+    "assigned_nurse": "Nurse Dlamini",
+    "admission_reason": "Appendectomy",
+    "surgeries": [
+      "Laparoscopic appendectomy"
+    ],
+    "notes": "Mild abdominal pain overnight",
+    "id": "patient_4565b33d",
+    "created_at": "2026-04-10T06:54:10.496775"
+  }
+]
