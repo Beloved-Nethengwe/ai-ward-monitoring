@@ -5,7 +5,7 @@ from statistics import mean
 from typing import Any
 
 import google.generativeai as genai
-
+from groq import Groq
 from app.config import settings
 from app.models import Alert, Patient, VitalReading
 
@@ -78,7 +78,6 @@ def summarize_vital_trend(vitals: list[VitalReading]) -> dict[str, Any]:
         "trend_text": "; ".join(trend_lines),
         "metrics": metrics,
     }
-
 
 def build_alert_prompt(
     patient: Patient,
@@ -195,43 +194,69 @@ def extract_json_object(text: str) -> dict[str, Any]:
 
 
 def call_external_ai(prompt: str) -> dict[str, Any]:
-    print("Entered call_external_ai")
+    print("\n[AI] call_external_ai invoked")
 
-    print("AI_PROVIDER =", settings.AI_PROVIDER)
-    print("AI_MODEL =", settings.AI_MODEL)
-    print("Has API key =", bool(settings.AI_API_KEY))
+    if settings.AI_PROVIDER != "groq":
+        print(f"[AI] Provider not enabled. Current provider: {settings.AI_PROVIDER}")
+        raise RuntimeError("Groq provider not enabled")
 
-    if settings.AI_PROVIDER != "gemini_legacy":
-        raise RuntimeError(f"External AI provider not enabled. Got: {settings.AI_PROVIDER}")
+    if not settings.GROQ_API_KEY:
+        print("[AI] Missing GROQ_API_KEY")
+        raise RuntimeError("Missing GROQ_API_KEY")
 
-    if not settings.AI_API_KEY:
-        raise RuntimeError("Missing Gemini API key")
+    print(f"[AI] Using provider: {settings.AI_PROVIDER}")
+    print(f"[AI] Using model: {settings.AI_MODEL}")
+    print("[AI] Creating native Groq client...")
 
-    genai.configure(api_key=settings.AI_API_KEY)
-    model = genai.GenerativeModel(settings.AI_MODEL)
+    client = Groq(
+        api_key=settings.GROQ_API_KEY,
+    )
 
-    print("Sending prompt to Gemini...")
-    response = model.generate_content(prompt)
+    print("[AI] Sending chat completion request to Groq...")
+    print(f"[AI] Prompt preview: {prompt[:500]}")
 
-    print("Raw response object:", response)
+    try:
+        response = client.chat.completions.create(
+            model=settings.AI_MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            temperature=0.2,
+        )
+        print("[AI] Response received from Groq")
+    except Exception as exc:
+        print(f"[AI] Request failed: {exc}")
+        raise
 
-    text = getattr(response, "text", None)
-    print("AI response text:", text)
+    text = response.choices[0].message.content if response.choices else None
+    print(f"[AI] Raw response text: {text}")
 
     if not text:
-        raise RuntimeError("Gemini returned an empty response")
+        print("[AI] Groq returned an empty response")
+        raise RuntimeError("Groq returned an empty response")
 
-    data = extract_json_object(text)
-    print("Parsed JSON:", data)
+    try:
+        data = extract_json_object(text)
+        print(f"[AI] Parsed JSON: {data}")
+    except Exception as exc:
+        print(f"[AI] Failed to parse JSON from model response: {exc}")
+        raise
 
     if not isinstance(data, dict):
-        raise RuntimeError("Gemini response was not a JSON object")
+        print(f"[AI] Parsed response is not a dict. Type: {type(data)}")
+        raise RuntimeError("Groq response was not a JSON object")
 
-    return {
+    result = {
         "risk_summary": data.get("risk_summary", ""),
         "concerns_to_consider": data.get("concerns_to_consider", []),
         "escalation": data.get("escalation", ""),
     }
+
+    print(f"[AI] Final normalized result: {result}")
+    return result
 
 def get_ai_alert_summary(
     patient: Patient,

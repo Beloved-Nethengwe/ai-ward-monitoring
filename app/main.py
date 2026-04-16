@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-
+from fastapi.middleware.cors import CORSMiddleware
 from app.monitoring import monitoring_engine
 from app.routes.alerts import router as alerts_router
 from app.routes.handover import router as handover_router
@@ -23,7 +23,13 @@ app = FastAPI(
     version="0.3.0",
     lifespan=lifespan,
 )
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(patients_router)
 app.include_router(vitals_router)
 app.include_router(alerts_router)

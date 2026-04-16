@@ -26,5 +26,19 @@
     "notes": "Mild abdominal pain overnight",
     "id": "patient_4565b33d",
     "created_at": "2026-04-10T06:54:10.496775"
+  },
+  {
+    "name": "Mariam",
+    "surname": "Van Royen",
+    "ward": "Surgical Ward",
+    "bed": "B14",
+    "assigned_nurse": "Nurse Mahapa",
+    "admission_reason": "Apendics",
+    "surgeries": [
+      "Apendix emoval operation"
+    ],
+    "notes": "No available notes as of yet",
+    "id": "patient_602d6513",
+    "created_at": "2026-04-14T09:17:29.563654"
   }
 ]
